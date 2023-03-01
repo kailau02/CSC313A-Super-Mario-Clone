@@ -72,8 +72,7 @@ public class PlayerController : MonoBehaviour
 
     void checkJump() {
         if (Input.GetButtonDown("Jump") && blocksOn > 0) {
-            rb2d.velocity = new Vector2(rb2d.velocity.x, 0);
-            rb2d.AddForce(new Vector2(0, jumpForce));
+            rb2d.velocity = new Vector2(rb2d.velocity.x, jumpForce);
             string soundSrc = isSm ? "jump-sm" : "jump-reg";
             GameObject.Find(soundSrc).GetComponent<AudioSource>().Play();
         }
@@ -150,12 +149,13 @@ public class PlayerController : MonoBehaviour
     }
 
     private void OnTriggerEnter2D(Collider2D other) {
-        if (other.tag.Equals("Ground") || other.tag.Equals("brick") || other.tag.Equals("questionblock")) {
+        if (other.tag.Equals("Ground") || other.tag.Equals("brick") || other.tag.Equals("questionblock") || other.tag.Equals("pipe") || other.tag.Equals("step")) {
             blocksOn++;
         }    
         else if (other.tag.Equals("goomba_head")) {
             other.transform.parent.GetComponent<GoombaController>().onSquash();
-            rb2d.AddForce(new Vector2(0, jumpForce * 0.5f));
+            rb2d.velocity = new Vector2(rb2d.velocity.x, 0);
+            rb2d.AddForce(new Vector2(0, jumpForce * 20f));
         }
         else if (other.tag.Equals("goomba_body")) {
             SceneManager.LoadScene(0);
@@ -166,7 +166,7 @@ public class PlayerController : MonoBehaviour
         if (other.tag.Equals("Entrance1")) {
             collidingPipe = null;
         }
-        else if (other.tag.Equals("Ground") || other.tag.Equals("brick") || other.tag.Equals("questionblock")) {
+        else if (other.tag.Equals("Ground") || other.tag.Equals("brick") || other.tag.Equals("questionblock") || other.tag.Equals("pipe") || other.tag.Equals("step")) {
             blocksOn--;
         }
     }

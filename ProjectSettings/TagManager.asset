@@ -13,6 +13,9 @@ TagManager:
   - coin
   - goomba_head
   - goomba_body
+  - pipe
+  - step
+  - edge
   layers:
   - Default
   - TransparentFX
