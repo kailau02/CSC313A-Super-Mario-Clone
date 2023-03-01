@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class PlayerController : MonoBehaviour
 {
@@ -9,7 +10,6 @@ public class PlayerController : MonoBehaviour
     public float jumpForce = 10;
     public float movementSpeed = 10;
     private bool isSm = true;
-    private bool onGround = true;
     private int blocksOn = 0;
     private bool isMoving = false;
     MarioAnimation currAnim = MarioAnimation.stand_sm;
@@ -21,7 +21,6 @@ public class PlayerController : MonoBehaviour
         boxCollider2D = GetComponent<BoxCollider2D>();
         rb2d = GetComponent<Rigidbody2D>();
         animator = GetComponent<Animator>();
-        
         setIsSmall(true);
     }
 
@@ -30,6 +29,13 @@ public class PlayerController : MonoBehaviour
         handleUserInput();
         updateAnimation();
         checkPipeTransport();
+        checkDeath();
+    }
+
+    void checkDeath() {
+        if (transform.position.y < -5f) {
+            SceneManager.LoadScene(0);
+        }
     }
 
     void checkPipeTransport() {
@@ -66,8 +72,7 @@ public class PlayerController : MonoBehaviour
 
     void checkJump() {
         if (Input.GetButtonDown("Jump") && blocksOn > 0) {
-            onGround = false;
-            Debug.Log(blocksOn);
+            rb2d.velocity = new Vector2(rb2d.velocity.x, 0);
             rb2d.AddForce(new Vector2(0, jumpForce));
             string soundSrc = isSm ? "jump-sm" : "jump-reg";
             GameObject.Find(soundSrc).GetComponent<AudioSource>().Play();
@@ -134,13 +139,9 @@ public class PlayerController : MonoBehaviour
             currAnim = anim;
         }
     }
-
     private void OnTriggerStay2D(Collider2D collision)
     {
-        if (collision.tag.Equals("Ground") || collision.tag.Equals("brick") || collision.tag.Equals("questionblock")) {
-            onGround = true;
-        }
-        else if (collision.tag.Equals("Entrance1")) {
+        if (collision.tag.Equals("Entrance1")) {
             collidingPipe = "Entrance1";
         }
         else if (collision.tag.Equals("Entrance2")) {
@@ -150,9 +151,15 @@ public class PlayerController : MonoBehaviour
 
     private void OnTriggerEnter2D(Collider2D other) {
         if (other.tag.Equals("Ground") || other.tag.Equals("brick") || other.tag.Equals("questionblock")) {
-            onGround = true;
             blocksOn++;
         }    
+        else if (other.tag.Equals("goomba_head")) {
+            other.transform.parent.GetComponent<GoombaController>().onSquash();
+            rb2d.AddForce(new Vector2(0, jumpForce * 0.5f));
+        }
+        else if (other.tag.Equals("goomba_body")) {
+            SceneManager.LoadScene(0);
+        }
     }
 
     private void OnTriggerExit2D(Collider2D other) {
@@ -160,7 +167,6 @@ public class PlayerController : MonoBehaviour
             collidingPipe = null;
         }
         else if (other.tag.Equals("Ground") || other.tag.Equals("brick") || other.tag.Equals("questionblock")) {
-            onGround = false;
             blocksOn--;
         }
     }

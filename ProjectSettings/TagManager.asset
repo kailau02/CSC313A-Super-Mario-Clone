@@ -11,6 +11,8 @@ TagManager:
   - brick
   - questionblock
   - coin
+  - goomba_head
+  - goomba_body
   layers:
   - Default
   - TransparentFX
